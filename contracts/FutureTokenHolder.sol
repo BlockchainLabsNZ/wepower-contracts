@@ -6,12 +6,12 @@ contract FutureTokenHolder is Ownable {
   using SafeMath for uint256;
 
   Contribution contribution;
-  ERC20 wrp;
+  ERC20 wpr;
 
-  function FutureTokenHolder(address _owner, address _contribution, address _wrp) {
+  function FutureTokenHolder(address _owner, address _contribution, address _wpr) {
     owner = _owner;
     contribution = Contribution(_contribution);
-    wrp = ERC20(_wrp);
+    wpr = ERC20(_wpr);
   }
 
   /// @notice The Dev (Owner) will call this method to extract the tokens
@@ -19,8 +19,8 @@ contract FutureTokenHolder is Ownable {
     uint256 finalizedTime = contribution.finalizedTime();
     require(finalizedTime > 0 && getTime() > finalizedTime.add(1 years));
 
-    uint256 balance = wrp.balanceOf(address(this));
-    require(wrp.transfer(owner, balance));
+    uint256 balance = wpr.balanceOf(address(this));
+    require(wpr.transfer(owner, balance));
     TokensWithdrawn(owner, balance);
   }
 
@@ -37,7 +37,7 @@ contract FutureTokenHolder is Ownable {
   /// @param _token The address of the token contract that you want to recover
   ///  set to 0 in case you want to extract ether.
   function claimTokens(address _token) public onlyOwner {
-    require(_token != address(wrp));
+    require(_token != address(wpr));
     if (_token == 0x0) {
       owner.transfer(this.balance);
       return;

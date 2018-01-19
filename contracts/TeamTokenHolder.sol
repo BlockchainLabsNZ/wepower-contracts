@@ -6,18 +6,18 @@ contract TeamTokenHolder is Ownable {
   using SafeMath for uint256;
 
   Contribution contribution;
-  ERC20 wrp;
+  ERC20 wpr;
   uint256 public collectedTokens;
 
-  function TeamTokenHolder(address _owner, address _contribution, address _wrp) {
+  function TeamTokenHolder(address _owner, address _contribution, address _wpr) {
     owner = _owner;
     contribution = Contribution(_contribution);
-    wrp = ERC20(_wrp);
+    wpr = ERC20(_wpr);
   }
 
   /// @notice The Dev (Owner) will call this method to extract the tokens
   function collectTokens() public onlyOwner {
-    uint256 balance = wrp.balanceOf(address(this));
+    uint256 balance = wpr.balanceOf(address(this));
     uint256 total = collectedTokens.add(balance);
 
     uint256 finalizedTime = contribution.finalizedTime();
@@ -33,7 +33,7 @@ contract TeamTokenHolder is Ownable {
     }
 
     collectedTokens = collectedTokens.add(canExtract);
-    assert(wrp.transfer(owner, canExtract));
+    assert(wpr.transfer(owner, canExtract));
 
     TokensWithdrawn(owner, canExtract);
   }
@@ -55,7 +55,7 @@ contract TeamTokenHolder is Ownable {
   /// @param _token The address of the token contract that you want to recover
   ///  set to 0 in case you want to extract ether.
   function claimTokens(address _token) public onlyOwner {
-    require(_token != address(wrp));
+    require(_token != address(wpr));
     if (_token == 0x0) {
       owner.transfer(this.balance);
       return;
