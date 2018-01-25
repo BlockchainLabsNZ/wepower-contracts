@@ -59,7 +59,7 @@ contract Exchanger is ExchangerI, Ownable {
 
     uint256 pre_sale_fixed_at = contribution.initializedBlock();
 
-    // Get current WPR ballance at contributions initialization-
+    // Get current WPR balance at contributions initialization-
     uint256 balance = wct1.balanceOfAt(caller, pre_sale_fixed_at);
     balance = balance.add(wct2.balanceOfAt(caller, pre_sale_fixed_at));
 
