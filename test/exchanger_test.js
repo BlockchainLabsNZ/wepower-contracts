@@ -20,7 +20,7 @@ contract(
     let wct1;
     let wct2;
     let tokensPreSold = new BigNumber(50 * 10 ** 18);
-    let wprInExchanger = tokensPreSold.mul(1250);
+    let wprInExchanger = tokensPreSold.mul(10000);
     let multiSig = owner;
     let totalCap;
     let collectorWeiCap;

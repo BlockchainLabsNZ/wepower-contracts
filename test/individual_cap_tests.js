@@ -97,7 +97,7 @@ contract(
         });
         assert.equal(
           (await wpr.balanceOf.call(investor)).toNumber(),
-          web3.toWei(new BigNumber(12500), "ether").toNumber()
+          web3.toWei(new BigNumber(20000), "ether").toNumber()
         );
       });
 
@@ -111,9 +111,11 @@ contract(
           from: investor,
           value: value
         });
+        // 10eth / 4 investors = 2.5eth indivdual cap
+        // 2.5eth * exchange rate of 8000
         assert.equal(
           (await wpr.balanceOf.call(investor)).toNumber(),
-          web3.toWei(new BigNumber(12500), "ether").toNumber()
+          web3.toWei(new BigNumber(20000), "ether").toNumber()
         );
         await expectThrow(async () => {
           await contribution.proxyPayment(investor, {
@@ -123,11 +125,11 @@ contract(
         });
         assert.equal(
           (await wpr.balanceOf.call(investor)).toNumber(),
-          web3.toWei(new BigNumber(12500), "ether").toNumber()
+          web3.toWei(new BigNumber(20000), "ether").toNumber()
         );
       });
 
-      it("After the first hour, a whitelisted investor can purchase the remaining tokens", async function() {
+      it("After the first 5 hours, a whitelisted investor can purchase the remaining tokens", async function() {
         await contribution.whitelist(investor);
         await contribution.whitelist(investor2);
         await contribution.whitelist(investor3);
@@ -135,7 +137,7 @@ contract(
 
         // Start time + 1 hour
         await contribution.setBlockTimestamp(
-          currentTime + 1 + duration.hours(2)
+          currentTime + 1 + duration.hours(6)
         );
 
         // Total cap is 10 eth
@@ -147,7 +149,7 @@ contract(
         });
         assert.equal(
           (await wpr.balanceOf.call(investor)).toNumber(),
-          web3.toWei(new BigNumber(12500), "ether").toNumber()
+          web3.toWei(new BigNumber(80000), "ether").toNumber()
         );
       });
     });
