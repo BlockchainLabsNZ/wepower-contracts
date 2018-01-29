@@ -2,7 +2,9 @@ const contract = require("truffle-contract");
 const ContributionABI = require("./build/contracts/Contribution.json");
 const Contribution = contract(ContributionABI);
 const Web3 = require("web3");
-var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8180"));
+// var web3 = new Web3(new Web3.providers.HttpProvider("http://192.168.1.233:8545"));
+// var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/073wFpxQklVU59F5vFCG"));
+var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/073wFpxQklVU59F5vFCG"));
 
 const fs = require("fs");
 
@@ -15,15 +17,19 @@ Contribution.setProvider(web3.currentProvider);
 const CHUNK_LENGTH = 130;
 
 // const ADDRESSES = require("./ARRAY_OF_ADDRESSES.js")();
-let ADDRESSES = fs.readFileSync("./whitelisted.csv", { encoding: "utf8" });
+let ADDRESSES = fs.readFileSync("./whitelisted_final.csv", { encoding: "utf8" });
 
 // KOVAN
-// const CONTRIBUTION_ADDRESS = "0x379927202bBD6cCFdfC4d4397b65d8860fb9978e";
+// const CONTRIBUTION_ADDRESS = "0x379927202bsBD6cCFdfC4d4397b65d8860fb9978e";
 // const CONTRIBUTION_OWNER = "0x0019810eAceA494E393daf6D2340092b89c97eBB";
 
 // DEV
-const CONTRIBUTION_ADDRESS = "0x2ceFD8FfD8d8A1c3d7f40BaaF1C070BCeF81A907";
-const CONTRIBUTION_OWNER = "0x0047F35735525f049e2103e3F654CCb589bF2b98";
+// const CONTRIBUTION_ADDRESS = "0x2ceFD8FfD8d8A1c3d7f40BaaF1C070BCeF81A907";
+// const CONTRIBUTION_OWNER = "0x0047F35735525f049e2103e3F654CCb589bF2b98";
+
+// MAIN NET
+const CONTRIBUTION_ADDRESS = "0x89dd662cc0651a6f3631a617724525f2ff373b1e";
+const CONTRIBUTION_OWNER = "0x1e5e739d5B051Dc04F9a53eCCB8b31bD3252A427";
 
 let txConfirmation;
 let isWhitelisted;
@@ -50,41 +56,57 @@ console.log("TRANSACTIONS TO RUN : ", chunkedAddresses.length);
 // Sending random chunk - for testing purposes - remove me and use ^ above
 whitelist(chunkedAddresses[_.random(0, chunkedAddresses.length - 1, false)]);
 
-async function whitelist(addresses) {
-  try {
-    let instance = await Contribution.at(CONTRIBUTION_ADDRESS);
+let num_whitelisted, num_to_whitelist = 0;
 
-    // send only if the last address was whitelisted - maybe change it for a random address?
-    isWhitelisted = await instance.isWhitelisted(_.last(addresses), {
+async function whitelist(addresses) {
+  let_ instance = await Contribution.at(CONTRIBUTION_ADDRESS);
+  // try {
+
+    //STEVE PLEASE CHECK FOR NONSENSE
+
+    _.foreach(addresses, function(checkWhitelisted(address){})
+
+
+  // send only if the last address was whitelisted - maybe change it for a random address?
+  await Promise.all(addresses.map(async (address) => {
+    sleep.msleep(500);
+    isWhitelisted = await instance.isWhitelisted(address, {
       from: CONTRIBUTION_OWNER
     });
-
-    console.log("LAST ADDRESS IS ALREADY WHITELISTED : ", isWhitelisted);
-
-    if (isWhitelisted == false) {
-      // Waits for 10 secs so we don't hammer the node
-      sleep.sleep(10);
-      console.log("SENT AT : ", new Date());
-      console.log("NUMBER OF ADDRESSES TO WAITLIST : ", addresses.length);
-      try {
-        txConfirmation = await instance.whitelistAddresses(addresses, {
-          from: CONTRIBUTION_OWNER,
-          gas: 3700000
-        });
-      } catch (err) {
-        console.log(err);
-      }
-
-      console.log("GAS USED : ", txConfirmation.receipt.gasUsed);
-      console.log("TX HASH : ", txConfirmation.receipt.transactionHash);
+    if (isWhitelisted) {
+      num_whitelisted++;
+      fs.appendFile('whitelisted.csv', address + "\n");
+    } else {
+      num_to_whitelist++;
+      fs.appendFile('to_whitelist.csv', address + "\n");
     }
-    console.log(
-      "RANDOM ADDRESS TO TEST : ",
-      addresses[_.random(0, addresses.length - 1, false)]
-    );
-    console.log("FIRST ADDRESS TO TEST : ", _.first(addresses));
-    console.log("LAST ADDRESS TO TEST : ", _.last(addresses));
-  } catch (err) {
-    console.log(err);
-  }
+    console.log('%s - %s', address, isWhitelisted);
+  }));
+
+    // if (isWhitelisted == false) {
+    //   // Waits for 10 secs so we don't hammer the node
+    //   sleep.sleep(10);
+    //   console.log("SENT AT : ", new Date());
+    //   console.log("NUMBER OF ADDRESSES TO WAITLIST : ", addresses.length);
+    //   try {
+    //     txConfirmation = await instance.whitelistAddresses(addresses, {
+    //       from: CONTRIBUTION_OWNER,
+    //       gas: 3700000
+    //     });
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+
+    //   console.log("GAS USED : ", txConfirmation.receipt.gasUsed);
+    //   console.log("TX HASH : ", txConfirmation.receipt.transactionHash);
+    // }
+    // console.log(
+    //   "RANDOM ADDRESS TO TEST : ",
+    //   addresses[_.random(0, addresses.length - 1, false)]
+    // );
+  // } catch (err) {
+  //   console.log(err);
+  // }
+  console.log("Total Whitelisted: ", num_whitelisted);
+  console.log("Total left to whitelist: ", num_to_whitelist);
 }
