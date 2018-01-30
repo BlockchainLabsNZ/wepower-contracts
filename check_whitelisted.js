@@ -27,6 +27,7 @@ let isWhitelisted;
 fs.openSync("toWhitelist.csv", "w");
 fs.openSync("alreadyWhitelisted.csv", "w");
 fs.openSync("errors.txt", "w");
+console.log("Log files initialized");
 
 // FILE WE'LL READ ADDRESSES FROM
 const readFrom = "whitelisted.csv";
@@ -39,6 +40,7 @@ let counter = 0;
 lineReader.on("line", async line => {
   counter++;
   if (counter % 5000 == 0) {
+    console.log("Iterations : ", counter);
     console.log("Pausing job...", new Date());
     lineReader.pause();
     sleep.sleep(5);
@@ -81,7 +83,6 @@ const checkWhitelisted = async address => {
     }
   } catch (err) {
     try {
-      console.log(err);
       fs.appendFileSync("errors.txt", err + "\n");
     } catch (err) {
       console.log(err);
