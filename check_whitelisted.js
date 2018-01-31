@@ -26,11 +26,12 @@ let isWhitelisted;
 // INITIALIZE LOG FILES
 fs.openSync("toWhitelist.csv", "w");
 fs.openSync("alreadyWhitelisted.csv", "w");
+fs.openSync("erroredAddresses.csv", "w");
 fs.openSync("errors.txt", "w");
 console.log("Log files initialized");
 
 // FILE WE'LL READ ADDRESSES FROM
-const readFrom = "whitelisted.csv";
+const readFrom = "whitelist-new.csv";
 var lineReader = require("readline").createInterface({
   input: fs.createReadStream(readFrom, { encoding: "utf8" })
 });
@@ -48,44 +49,25 @@ lineReader.on("line", async line => {
     lineReader.resume();
   }
   await checkWhitelisted(line.toLowerCase());
-
-  // PAUL/MATT: ALTERNATIVELY YOU CAN PLAY WITH THE COUNTER VALUE
-  // if (counter < 10000) {
-  //   await checkWhitelisted(line.toLowerCase());
-  // } else {
-  //   return false;
-  // }
 });
 
 const checkWhitelisted = async address => {
-  sleep.msleep(5);
+  sleep.msleep(10);
   try {
     // https://github.com/ethereum/web3.js/issues/1089#issuecomment-342184640
     isWhitelisted = await web3.eth.call({
       to: CONTRIBUTION_ADDRESS,
       data: Contribution.methods.canPurchase(address).encodeABI()
     });
-
     let result = web3.utils.hexToNumber(isWhitelisted);
-
     if (result == 1) {
-      try {
-        fs.appendFileSync("alreadyWhitelisted.csv", address + "\n");
-      } catch (err) {
-        console.log(err);
-      }
+      fs.appendFileSync("alreadyWhitelisted.csv", `${address}\n`);
     } else {
-      try {
-        fs.appendFileSync("toWhitelist.csv", address + "\n");
-      } catch (err) {
-        console.log(err);
-      }
+      fs.appendFileSync("toWhitelist.csv", `${address}\n`);
     }
   } catch (err) {
-    try {
-      fs.appendFileSync("errors.txt", err + "\n");
-    } catch (err) {
-      console.log(err);
-    }
+    // saving addresses for errored requests so we'll check them again
+    fs.appendFileSync("erroredAddresses.csv", `${address}\n`);
+    fs.appendFileSync("errors.txt", `${err}\n`);
   }
 };
